@@ -11,6 +11,7 @@ public class LoginPage extends BasePage {
     private final By loginButton = By.xpath("//button[text()='Войти']");
     private final By registerLink = By.xpath("//a[text()='Зарегистрироваться']");
     private final By forgotPasswordLink = By.xpath("//a[text()='Восстановить пароль']");
+    private final By loginLinkFromRegister = By.xpath("//a[text()='Войти']");
 
     public LoginPage(WebDriver driver) {
         super(driver);
@@ -46,5 +47,10 @@ public class LoginPage extends BasePage {
     @Step("Нажать ссылку «Восстановить пароль»")
     public void clickForgotPasswordLink() {
         driver.findElement(forgotPasswordLink).click();
+    }
+
+    @Step("Нажать ссылку «Войти» на странице регистрации")
+    public void clickLoginLinkFromRegister() {
+        driver.findElement(loginLinkFromRegister).click();
     }
 }

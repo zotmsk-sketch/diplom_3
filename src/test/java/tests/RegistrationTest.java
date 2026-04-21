@@ -1,14 +1,15 @@
 package tests;
 
+import api.User;
 import api.UserApiClient;
 import io.qameta.allure.Description;
+import io.qameta.allure.Step;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.WebDriver;
 import pages.MainPage;
 import pages.LoginPage;
 import pages.RegisterPage;
 import config.WebDriverProvider;
-import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RegistrationTest {
@@ -16,10 +17,11 @@ public class RegistrationTest {
     private MainPage mainPage;
     private LoginPage loginPage;
     private RegisterPage registerPage;
-    private Map<String, String> testUser;
+    private User testUser;
     private UserApiClient userApi;
 
     @BeforeEach
+    @Step("Подготовка окружения перед тестом")
     public void setUp() {
         driver = WebDriverProvider.getDriver();
         driver.manage().window().maximize();
@@ -30,10 +32,10 @@ public class RegistrationTest {
     }
 
     @AfterEach
+    @Step("Очистка после теста")
     public void tearDown() {
-        // УДАЛЕНИЕ ПОЛЬЗОВАТЕЛЯ (если был создан)
         if (testUser != null && userApi != null) {
-            userApi.deleteUserByCredentials(testUser.get("email"), testUser.get("password"));
+            userApi.deleteUserByCredentials(testUser.getEmail(), testUser.getPassword());
         }
         if (driver != null) {
             driver.quit();
@@ -42,25 +44,26 @@ public class RegistrationTest {
 
     @Test
     @Description("Успешная регистрация — проверяем, что созданным пользователем можно войти")
+    @Step("Тест успешной регистрации")
     public void testSuccessfulRegistration() {
         testUser = UserApiClient.generateRandomUser();
 
         mainPage.open();
         mainPage.clickLoginButton();
         loginPage.clickRegisterLink();
-        registerPage.register(testUser.get("name"), testUser.get("email"), testUser.get("password"));
+        registerPage.register(testUser.getName(), testUser.getEmail(), testUser.getPassword());
 
-        // После регистрации пробуем войти
         if (!driver.getCurrentUrl().contains("login")) {
             mainPage.open();
             mainPage.clickLoginButton();
         }
-        loginPage.login(testUser.get("email"), testUser.get("password"));
+        loginPage.login(testUser.getEmail(), testUser.getPassword());
         assertTrue(mainPage.isConstructorHeaderDisplayed(), "Не удалось войти после регистрации");
     }
 
     @Test
     @Description("Ошибка для пароля меньше 6 символов")
+    @Step("Тест ошибки для короткого пароля")
     public void testRegistrationWithShortPassword() {
         mainPage.open();
         mainPage.clickLoginButton();
@@ -70,6 +73,5 @@ public class RegistrationTest {
 
         assertTrue(registerPage.isErrorMessageDisplayed());
         assertEquals("Некорректный пароль", registerPage.getErrorMessageText());
-        // пользователь не создаётся, удалять нечего
     }
 }
