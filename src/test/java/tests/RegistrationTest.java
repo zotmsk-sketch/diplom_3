@@ -1,5 +1,6 @@
 package tests;
 
+import api.UserApiClient;
 import io.qameta.allure.Description;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.WebDriver;
@@ -7,6 +8,7 @@ import pages.MainPage;
 import pages.LoginPage;
 import pages.RegisterPage;
 import config.WebDriverProvider;
+import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RegistrationTest {
@@ -14,6 +16,8 @@ public class RegistrationTest {
     private MainPage mainPage;
     private LoginPage loginPage;
     private RegisterPage registerPage;
+    private Map<String, String> testUser;
+    private UserApiClient userApi;
 
     @BeforeEach
     public void setUp() {
@@ -22,25 +26,36 @@ public class RegistrationTest {
         mainPage = new MainPage(driver);
         loginPage = new LoginPage(driver);
         registerPage = new RegisterPage(driver);
+        userApi = new UserApiClient();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // УДАЛЕНИЕ ПОЛЬЗОВАТЕЛЯ (если был создан)
+        if (testUser != null && userApi != null) {
+            userApi.deleteUserByCredentials(testUser.get("email"), testUser.get("password"));
+        }
+        if (driver != null) {
+            driver.quit();
+        }
     }
 
     @Test
     @Description("Успешная регистрация — проверяем, что созданным пользователем можно войти")
     public void testSuccessfulRegistration() {
+        testUser = UserApiClient.generateRandomUser();
+
         mainPage.open();
         mainPage.clickLoginButton();
         loginPage.clickRegisterLink();
+        registerPage.register(testUser.get("name"), testUser.get("email"), testUser.get("password"));
 
-        String email = "user_" + System.currentTimeMillis() + "@test.ru";
-        String password = "123456";
-        registerPage.register("Тест", email, password);
-
-
+        // После регистрации пробуем войти
         if (!driver.getCurrentUrl().contains("login")) {
             mainPage.open();
             mainPage.clickLoginButton();
         }
-        loginPage.login(email, password);
+        loginPage.login(testUser.get("email"), testUser.get("password"));
         assertTrue(mainPage.isConstructorHeaderDisplayed(), "Не удалось войти после регистрации");
     }
 
@@ -55,10 +70,6 @@ public class RegistrationTest {
 
         assertTrue(registerPage.isErrorMessageDisplayed());
         assertEquals("Некорректный пароль", registerPage.getErrorMessageText());
-    }
-
-    @AfterEach
-    public void tearDown() {
-        if (driver != null) driver.quit();
+        // пользователь не создаётся, удалять нечего
     }
 }

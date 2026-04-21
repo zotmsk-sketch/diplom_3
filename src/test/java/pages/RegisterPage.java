@@ -1,5 +1,6 @@
 package pages;
 
+import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -15,6 +16,7 @@ public class RegisterPage extends BasePage {
         super(driver);
     }
 
+    @Step("Регистрация пользователя: имя {name}, email {email}, пароль {password}")
     public void register(String name, String email, String password) {
         wait.until(ExpectedConditions.visibilityOfElementLocated(nameField)).sendKeys(name);
         driver.findElement(emailField).sendKeys(email);
@@ -22,6 +24,7 @@ public class RegisterPage extends BasePage {
         driver.findElement(registerButton).click();
     }
 
+    @Step("Проверка отображения ошибки «Некорректный пароль»")
     public boolean isErrorMessageDisplayed() {
         try {
             return driver.findElement(errorMessage).isDisplayed();
@@ -30,6 +33,7 @@ public class RegisterPage extends BasePage {
         }
     }
 
+    @Step("Получение текста ошибки")
     public String getErrorMessageText() {
         return driver.findElement(errorMessage).getText();
     }

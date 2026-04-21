@@ -4,7 +4,10 @@ import io.qameta.allure.Description;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import pages.*;
+import pages.MainPage;
+import pages.LoginPage;
+import pages.RegisterPage;
+import pages.ForgotPasswordPage;
 import config.WebDriverProvider;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -27,7 +30,6 @@ public class LoginTest {
         registerPage = new RegisterPage(driver);
         forgotPasswordPage = new ForgotPasswordPage(driver);
 
-        // Создаём пользователя перед тестами
         mainPage.open();
         mainPage.clickLoginButton();
         loginPage.clickRegisterLink();
